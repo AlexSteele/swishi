@@ -3,8 +3,8 @@ module Transform where
 import Codec.Picture (DynamicImage)
 import qualified Codec.Picture as J
 import qualified Vision.Image as F
-import Vision.Image.JuicyPixels as Convert
-    ( toFridayRGB, toJuicyGrey )
+import qualified Vision.Image.Transform as T
+import qualified Vision.Image.JuicyPixels as Convert
 
 -- FIXME: Lots of JuicyPixels->friday->JuicyPixels conversions
 
@@ -17,7 +17,9 @@ data Transform = Transform {
 transforms :: [Transform]
 transforms =
   [ blackAndWhiteTransform
-  , greyTransform ]
+  , greyTransform
+  , horizontalFlipTransform
+  , verticalFlipTransform ]
 
 shortSummary :: Transform -> String
 shortSummary t = name t ++ " - " ++ description t
@@ -53,3 +55,30 @@ toGrey img = result
     fgrey = F.convert frgb :: F.Grey
     jgrey = Convert.toJuicyGrey fgrey
     result = J.ImageY8 jgrey
+
+horizontalFlipTransform = Transform {
+  name = "hflip",
+  description = "horizontal flip",
+  apply = hflip
+}
+
+hflip :: DynamicImage -> DynamicImage
+hflip = applyRGBTransform T.horizontalFlip
+
+verticalFlipTransform = Transform {
+  name = "vflip",
+  description = "vertical flip",
+  apply = vflip
+}
+
+vflip :: DynamicImage -> DynamicImage
+vflip = applyRGBTransform T.verticalFlip
+
+applyRGBTransform :: (F.RGB -> F.RGB) -> DynamicImage -> DynamicImage
+applyRGBTransform transform img = result
+  where
+    rgb = J.convertRGB8 img
+    fimg = Convert.toFridayRGB rgb
+    transformed = transform fimg
+    rimg = Convert.toJuicyRGB fimg
+    result = J.ImageRGB8 rimg
