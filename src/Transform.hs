@@ -80,5 +80,5 @@ applyRGBTransform transform img = result
     rgb = J.convertRGB8 img
     fimg = Convert.toFridayRGB rgb
     transformed = transform fimg
-    rimg = Convert.toJuicyRGB fimg
+    rimg = Convert.toJuicyRGB transformed
     result = J.ImageRGB8 rimg
